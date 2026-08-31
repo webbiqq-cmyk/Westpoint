@@ -1,0 +1,16 @@
+{
+  "name": "westpoint-security-demo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "build": "next build",
+    "start": "NODE_ENV=production node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "next": "^16.3.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
