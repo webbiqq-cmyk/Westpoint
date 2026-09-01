@@ -414,7 +414,8 @@ nav a:hover {
   color: var(--green-500);
 }
 
-.gate-state.opening span {
+.gate-state.opening span,
+.gate-state.closing span {
   color: var(--amber-500);
 }
 
@@ -422,8 +423,14 @@ nav a:hover {
   color: var(--red-500);
 }
 
-.open-gate {
-  background: var(--green-700);
+.gate-actions {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.open-gate,
+.close-gate {
   border: 0;
   border-radius: 8px;
   color: var(--white);
@@ -431,6 +438,14 @@ nav a:hover {
   font-weight: 800;
   min-height: 58px;
   width: 100%;
+}
+
+.open-gate {
+  background: var(--green-700);
+}
+
+.close-gate {
+  background: var(--red-500);
 }
 
 .hint {
@@ -654,6 +669,10 @@ option {
 
   .operator-form,
   .operator-row {
+    grid-template-columns: 1fr;
+  }
+
+  .gate-actions {
     grid-template-columns: 1fr;
   }
 

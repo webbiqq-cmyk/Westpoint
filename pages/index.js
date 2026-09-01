@@ -33,7 +33,7 @@ const initialLogs = [
   }
 ];
 
-const gateStates = ["Closed", "Opening", "Open", "Offline"];
+const gateStates = ["Closed", "Opening", "Open", "Closing", "Offline"];
 const roles = ["Admin", "Operator", "Viewer"];
 
 function formatTimestamp(date) {
@@ -59,7 +59,7 @@ export default function Home() {
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedLogin, setSelectedLogin] = useState("Operator");
   const [gateStatus, setGateStatus] = useState("Closed");
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
   const [operators, setOperators] = useState(initialOperators);
   const [logs, setLogs] = useState(initialLogs);
   const [remoteAccess, setRemoteAccess] = useState(true);
@@ -99,16 +99,29 @@ export default function Home() {
   function openGate() {
     if (!remoteAccess || gateStatus === "Offline") {
       addLog("Gate open command blocked", "Failed");
-      setConfirmOpen(false);
+      setConfirmAction(null);
       return;
     }
 
     setGateStatus("Opening");
     addLog(`Gate opened by ${currentUser.role}`);
-    setConfirmOpen(false);
+    setConfirmAction(null);
 
     window.setTimeout(() => setGateStatus("Open"), 850);
-    window.setTimeout(() => setGateStatus("Closed"), 4600);
+  }
+
+  function closeGate() {
+    if (!remoteAccess || gateStatus === "Offline") {
+      addLog("Gate close command blocked", "Failed");
+      setConfirmAction(null);
+      return;
+    }
+
+    setGateStatus("Closing");
+    addLog(`Gate closed by ${currentUser.role}`);
+    setConfirmAction(null);
+
+    window.setTimeout(() => setGateStatus("Closed"), 850);
   }
 
   function addOperator(event) {
@@ -262,16 +275,38 @@ export default function Home() {
             <div className={`gate-state ${gateStatus.toLowerCase()}`}>
               <span>{gateStatus}</span>
             </div>
-            <button
-              className="open-gate"
-              disabled={!remoteAccess || gateStatus === "Offline"}
-              onClick={() => setConfirmOpen(true)}
-              type="button"
-            >
-              Open Gate
-            </button>
+            <div className="gate-actions">
+              <button
+                className="open-gate"
+                disabled={
+                  !remoteAccess ||
+                  gateStatus === "Offline" ||
+                  gateStatus === "Open" ||
+                  gateStatus === "Opening" ||
+                  gateStatus === "Closing"
+                }
+                onClick={() => setConfirmAction("open")}
+                type="button"
+              >
+                Open Gate
+              </button>
+              <button
+                className="close-gate"
+                disabled={
+                  !remoteAccess ||
+                  gateStatus === "Offline" ||
+                  gateStatus === "Closed" ||
+                  gateStatus === "Opening" ||
+                  gateStatus === "Closing"
+                }
+                onClick={() => setConfirmAction("close")}
+                type="button"
+              >
+                Close Gate
+              </button>
+            </div>
             <p className="hint">
-              Command is simulated and writes an audit log. No hardware connection is active.
+              Commands are simulated and write an audit log. No hardware connection is active.
             </p>
           </article>
         </section>
@@ -388,21 +423,27 @@ export default function Home() {
         </section>
       </section>
 
-      {confirmOpen && (
+      {confirmAction && (
         <div className="modal-backdrop" role="presentation">
           <section aria-labelledby="confirm-title" className="confirm-modal" role="dialog">
             <p className="eyebrow">Confirm command</p>
-            <h2 id="confirm-title">Open Gate A?</h2>
+            <h2 id="confirm-title">
+              {confirmAction === "open" ? "Open Gate A?" : "Close Gate A?"}
+            </h2>
             <p>
-              This demo will simulate a remote gate command and record the operator,
-              device, time, and result in the activity log.
+              This demo will simulate a remote gate {confirmAction} command and record the
+              operator, device, time, and result in the activity log.
             </p>
             <div className="modal-actions">
-              <button onClick={() => setConfirmOpen(false)} type="button">
+              <button onClick={() => setConfirmAction(null)} type="button">
                 Cancel
               </button>
-              <button className="primary-action" onClick={openGate} type="button">
-                Confirm Open
+              <button
+                className="primary-action"
+                onClick={confirmAction === "open" ? openGate : closeGate}
+                type="button"
+              >
+                {confirmAction === "open" ? "Confirm Open" : "Confirm Close"}
               </button>
             </div>
           </section>
